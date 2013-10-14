@@ -10,10 +10,10 @@ class MoviesController < ApplicationController
     if params[:sort].nil? && params[:ratings].nil? &&
         (!session[sort].nil? || !session[:ratings].nil?)
     redirect_to movies_path(:sort => session[:sort], :ratings => session[:ratings])
-  end
+    end
 
-  @sort = params[:sort]
-  @ratings = params[:ratings] 
+    @sort = params[:sort]
+    @ratings = params[:ratings] 
     if @ratings.nil?
       ratings = Movie.ratings 
     else
