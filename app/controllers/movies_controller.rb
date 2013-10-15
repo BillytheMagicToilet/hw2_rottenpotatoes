@@ -27,7 +27,7 @@ class MoviesController < ApplicationController
       
     if !@sort.nil?
       begin
-        @movies = Movie.order("#{@sort} ASC").find_all_by_rating(possible_ratings)
+        @movies = Movie.order("#{@sort} ASC").find_all_by_rating(ratings)
       rescue ActiveRecord::StatementInvalid
         flash[:warning] = "Movies cannot be sorted by #{@sort}."
         @movies = Movie.find_all_by_rating(ratings)
