@@ -7,57 +7,34 @@ class MoviesController < ApplicationController
   end
 
   def index
-    if session[:ratings] && !params[:ratings]
-      if session[:redirected] == 0 || session[:redirected].nil?
-        redirect_to movies_path session[:ratings] 
-        session[:redirected] = 1
-        else
-          session[:redirected] = 0
-        end
+    sort = params[:sort]
+    @sort = sort
+    if (params[:sort])
+      session[:sort] = sort
     end
 
-    #setting up the sort_by key in session
-    if !params[:sort_by].nil?
-      session[:sort_by] = params[:sort_by]
-    end
-    
-    if params.has_key? :ratings
-      session[:ratings] = params[:ratings]
-    elsif params.has_key? :commit
-      session[:ratings] = nil
+    @filter_ratings = []
+    @filter_ratings_hash = {}
+    if (params[:ratings])# || session[:ratings])
+       #if (!params[:ratings])
+       #  params[:ratings] = session[:ratings]
+       #end
+
+       params[:ratings].each_key { |keyr| 
+         @filter_ratings.push(keyr)
+         @filter_ratings_hash[keyr] = keyr 
+       }
+       @movies = Movie.find(:all, :order=>sort, :conditions => {:rating => @filter_ratings})
+       session[:ratings] = @filter_ratings_hash
+    else
+       if (session[:ratings])
+         flash.keep
+         redirect_to movies_path(:sort=>session[:sort], :ratings=>session[:ratings])
+       end
+       @movies = Movie.all(:order=>sort)
     end
 
-    #set up the proper variables for what movies you want
-    @sort_by = session[:sort_by]
-    @ratings = session[:ratings]
-    
-   ##pull in movies in sorted order  
-    if @ratings
-      @movies = Movie.order(@sort_by).where("title != ''").select do |m|
-          @ratings.include? m.rating
-      end
-    end
-
-   ##set up the variables for the classes in the haml
-    if session[:sort_by] == 'title'
-      @title_class = 'hilite'
-    elsif session[:sort_by] == 'release_date'
-      @release_date_class = 'hilite'
-    end
-    
-    ##make an array of possible movie ratings available to the view      
-    @all_ratings = Movie.possible_ratings
-    
-    @ratings = Hash.new
-    @all_ratings.each do |rating| 
-      if session[:ratings].class == Hash
-        if session[:ratings].has_key? rating
-          @ratings[rating]= false
-        else
-          @ratings[rating] = true
-        end
-      end
-    end
+    @all_ratings = ['G','PG','PG-13','R']
   end
 
   def new
