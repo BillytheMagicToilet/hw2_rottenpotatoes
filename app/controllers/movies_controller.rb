@@ -33,8 +33,6 @@ class MoviesController < ApplicationController
        end
        @movies = Movie.all(:order=>sort)
     end
-
-    @all_ratings = ['G','PG','PG-13','R']
   end
 
   def new
